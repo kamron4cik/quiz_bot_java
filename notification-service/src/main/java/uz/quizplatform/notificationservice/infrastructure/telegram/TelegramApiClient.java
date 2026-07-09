@@ -55,10 +55,13 @@ public class TelegramApiClient {
     }
 
     public Message sendPoll(Long chatId, String question, List<String> options, boolean isAnonymous) {
+        var pollOptions = options.stream()
+                .map(opt -> org.telegram.telegrambots.meta.api.objects.polls.input.InputPollOption.builder().text(opt).build())
+                .collect(java.util.stream.Collectors.toList());
         var pollRequest = SendPoll.builder()
                 .chatId(chatId)
                 .question(question)
-                .options(options)
+                .options(pollOptions)
                 .isAnonymous(isAnonymous)
                 .type("quiz")
                 .build();
