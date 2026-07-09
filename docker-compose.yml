@@ -33,6 +33,12 @@ services:
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - PAYMENT_PRICE=${PAYMENT_PRICE}
+      - PAYMENT_CARD=${PAYMENT_CARD}
+      - PAYMENT_OWNER=${PAYMENT_OWNER}
+      - ADMIN_GROUP_ID=${ADMIN_GROUP_ID}
+      - FORWARD_CHANNEL_ID=${FORWARD_CHANNEL_ID}
+      - ADMIN_IDS=${ADMIN_IDS}
     networks:
       - quizplatform-network
 
@@ -94,8 +100,8 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME}
+      - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - BOT_USERNAME=${TELEGRAM_BOT_USERNAME}
       - USER_SERVICE_URL=http://user-service:8080
       - QUIZ_SERVICE_URL=http://quiz-service:8080
     networks:
@@ -112,7 +118,7 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - SPRING_RABBITMQ_HOST=rabbitmq
     networks:
       - quizplatform-network
