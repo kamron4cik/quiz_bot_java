@@ -1,0 +1,39 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: admin-service
+  threads:
+    virtual:
+      enabled: true
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+services:
+  user-service:
+    base-url: ${USER_SERVICE_URL:http://localhost:8082}
+  quiz-service:
+    base-url: ${QUIZ_SERVICE_URL:http://localhost:8083}
+  question-service:
+    base-url: ${QUESTION_SERVICE_URL:http://localhost:8084}
+  notification-service:
+    base-url: ${NOTIFICATION_SERVICE_URL:http://localhost:8085}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  metrics:
+    tags:
+      service: ${spring.application.name}
+
+logging:
+  level:
+    root: INFO
+    uz.quizplatform: DEBUG
