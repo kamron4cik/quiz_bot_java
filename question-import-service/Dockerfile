@@ -1,9 +1,7 @@
 # question-import-service — Multi-stage build
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /workspace
-COPY pom.xml .
-COPY common-libraries/ common-libraries/
-COPY question-import-service/ question-import-service/
+COPY . .
 RUN apk add --no-cache maven &&     mvn -B package -pl question-import-service -am -DskipTests -q
     
 FROM eclipse-temurin:21-jre-alpine

@@ -1,9 +1,7 @@
 # gateway-service — Multi-stage build
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /workspace
-COPY pom.xml .
-COPY common-libraries/ common-libraries/
-COPY gateway-service/ gateway-service/
+COPY . .
 RUN apk add --no-cache maven &&     mvn -B package -pl gateway-service -am -DskipTests -q
     
 FROM eclipse-temurin:21-jre-alpine

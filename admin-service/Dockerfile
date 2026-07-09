@@ -1,9 +1,7 @@
 # admin-service — Multi-stage build
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /workspace
-COPY pom.xml .
-COPY common-libraries/ common-libraries/
-COPY admin-service/ admin-service/
+COPY . .
 RUN apk add --no-cache maven &&     mvn -B package -pl admin-service -am -DskipTests -q
     
 FROM eclipse-temurin:21-jre-alpine

@@ -1,9 +1,7 @@
 # quiz-service — Multi-stage build
 FROM eclipse-temurin:21-jdk-alpine AS builder
 WORKDIR /workspace
-COPY pom.xml .
-COPY common-libraries/ common-libraries/
-COPY quiz-service/ quiz-service/
+COPY . .
 RUN apk add --no-cache maven &&     mvn -B package -pl quiz-service -am -DskipTests -q
     
 FROM eclipse-temurin:21-jre-alpine
