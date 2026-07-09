@@ -165,3 +165,4 @@ volumes:
 networks:
   default:
     name: quizplatform-network
+    external: true
