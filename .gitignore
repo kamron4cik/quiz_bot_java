@@ -1,0 +1,60 @@
+# Java compiled files
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+.eclipse/
+.classpath
+.project
+.settings/
+*.launch
+.factorypath
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Spring Boot
+spring-shell.log
+
+# Docker
+.dockerignore
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# JWT keys (never commit!)
+keys/
+*.pem
+*.key
+
+# Kubernetes secrets
+k8s/overlays/*/secrets/
+helm/*/secrets/
