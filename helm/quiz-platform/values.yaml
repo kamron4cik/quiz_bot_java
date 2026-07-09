@@ -1,0 +1,39 @@
+global:
+  imageRegistry: ghcr.io/yourusername/quiz-platform
+  imageTag: latest
+  environment: production
+
+services:
+  gateway:
+    port: 8080
+    replicas: 2
+  telegram:
+    port: 8081
+    replicas: 1
+  user:
+    port: 8082
+    replicas: 2
+  quiz:
+    port: 8083
+    replicas: 2
+  question:
+    port: 8084
+    replicas: 2
+  notification:
+    port: 8085
+    replicas: 2
+  admin:
+    port: 8086
+    replicas: 1
+  import:
+    port: 8087
+    replicas: 1
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: api.quizplatform.uz
+      paths:
+        - path: /
+          pathType: Prefix
