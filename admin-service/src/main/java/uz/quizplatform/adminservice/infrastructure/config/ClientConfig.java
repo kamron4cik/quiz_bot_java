@@ -37,4 +37,12 @@ public class ClientConfig {
                 .baseUrl(questionServiceUrl)
                 .build();
     }
+
+    
+    @Bean
+    public RestClient importServiceClient() {
+        return RestClient.builder()
+                .baseUrl(System.getenv().getOrDefault("IMPORT_SERVICE_URL", "http://localhost:8087"))
+                .build();
+    }
 }

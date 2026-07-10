@@ -1,5 +1,6 @@
 -- ============================================================
 -- V1: Questions & Categories Schema
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 -- quiz-platform — question-service
 -- ============================================================
 

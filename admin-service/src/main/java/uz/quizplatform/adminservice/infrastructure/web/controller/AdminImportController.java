@@ -1,8 +1,6 @@
 package uz.quizplatform.adminservice.infrastructure.web.controller;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
@@ -18,11 +16,14 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/admin/imports")
-@RequiredArgsConstructor
 @Tag(name = "Admin Imports", description = "Administrative endpoints for question document parsing and imports")
 public class AdminImportController {
 
     private final RestClient importServiceClient;
+
+    public AdminImportController(@org.springframework.beans.factory.annotation.Qualifier("importServiceClient") RestClient importServiceClient) {
+        this.importServiceClient = importServiceClient;
+    }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Upload raw document file to import storage (MinIO)")

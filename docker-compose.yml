@@ -94,6 +94,8 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
       - USER_SERVICE_URL=http://user-service:8082
       - QUIZ_SERVICE_URL=http://quiz-service:8083
       - QUESTION_SERVICE_URL=http://question-service:8084
@@ -116,7 +118,7 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform_java
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
@@ -151,7 +153,7 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform_java
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
@@ -183,7 +185,7 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform_java
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
@@ -206,7 +208,7 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform_java
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
@@ -266,6 +268,9 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform_java
+      - SPRING_DATASOURCE_USERNAME=quizplatform
+      - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
       - SPRING_RABBITMQ_PORT=5672
       - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
@@ -284,7 +289,7 @@ services:
     restart: unless-stopped
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform_java
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
