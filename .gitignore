@@ -43,7 +43,6 @@ Thumbs.db
 spring-shell.log
 
 # Docker
-.dockerignore
 
 # Logs
 logs/
