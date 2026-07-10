@@ -14,11 +14,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>uz.quizplatform</groupId>
             <artifactId>common-domain</artifactId>
         </dependency>
