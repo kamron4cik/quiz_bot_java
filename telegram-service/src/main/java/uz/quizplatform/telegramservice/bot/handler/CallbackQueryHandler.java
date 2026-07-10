@@ -21,7 +21,6 @@ import java.util.UUID;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class CallbackQueryHandler {
 
     private final UserServiceClient userServiceClient;
@@ -31,6 +30,23 @@ public class CallbackQueryHandler {
     private final ProfileWizardKeyboard wizardKeyboard;
     private final MainMenuKeyboard mainMenuKeyboard;
     private final RestClient importServiceClientInstance;
+
+    public CallbackQueryHandler(
+            UserServiceClient userServiceClient,
+            QuizServiceClient quizServiceClient,
+            TelegramMessageSender sender,
+            UserStateManager stateManager,
+            ProfileWizardKeyboard wizardKeyboard,
+            MainMenuKeyboard mainMenuKeyboard,
+            @org.springframework.beans.factory.annotation.Qualifier("importServiceClientInstance") RestClient importServiceClientInstance) {
+        this.userServiceClient = userServiceClient;
+        this.quizServiceClient = quizServiceClient;
+        this.sender = sender;
+        this.stateManager = stateManager;
+        this.wizardKeyboard = wizardKeyboard;
+        this.mainMenuKeyboard = mainMenuKeyboard;
+        this.importServiceClientInstance = importServiceClientInstance;
+    }
 
     public void handle(Update update) {
         var query = update.getCallbackQuery();

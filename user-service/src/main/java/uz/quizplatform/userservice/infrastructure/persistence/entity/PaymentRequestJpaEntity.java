@@ -30,7 +30,7 @@ public class PaymentRequestJpaEntity {
     private String major;
 
     @Column(name = "grade")
-    private Integer grade;
+    private Short grade;
 
     @Column(name = "study_method")
     private String studyMethod;

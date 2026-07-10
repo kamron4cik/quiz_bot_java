@@ -42,7 +42,7 @@ public class UserJpaEntity {
     private String major;
 
     @Column(name = "grade")
-    private Integer grade;
+    private Short grade;
 
     @Column(name = "study_method")
     @Enumerated(EnumType.STRING)

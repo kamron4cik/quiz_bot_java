@@ -12,11 +12,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin/users")
-@RequiredArgsConstructor
 @Tag(name = "Admin Users", description = "Administrative endpoints to query and manage platform users")
 public class AdminUserController {
 
     private final RestClient userServiceClient;
+
+    public AdminUserController(
+            @org.springframework.beans.factory.annotation.Qualifier("userServiceClient") RestClient userServiceClient) {
+        this.userServiceClient = userServiceClient;
+    }
 
     @GetMapping
     @Operation(summary = "List all platform users (paginated)")

@@ -15,12 +15,20 @@ import java.util.UUID;
 @Slf4j
 @Service
 @Primary
-@RequiredArgsConstructor
 public class QuizServiceClientImpl implements QuizServiceClient {
 
     private final RestClient quizServiceClientInstance;
     private final RestClient questionServiceClientInstance;
     private final UserServiceClient userServiceClient;
+
+    public QuizServiceClientImpl(
+            @org.springframework.beans.factory.annotation.Qualifier("quizServiceClientInstance") RestClient quizServiceClientInstance,
+            @org.springframework.beans.factory.annotation.Qualifier("questionServiceClientInstance") RestClient questionServiceClientInstance,
+            UserServiceClient userServiceClient) {
+        this.quizServiceClientInstance = quizServiceClientInstance;
+        this.questionServiceClientInstance = questionServiceClientInstance;
+        this.userServiceClient = userServiceClient;
+    }
 
     @Override
     public Session getPausedSession(Long userId) {

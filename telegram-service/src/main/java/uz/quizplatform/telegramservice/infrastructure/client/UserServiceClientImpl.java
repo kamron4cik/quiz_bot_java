@@ -13,10 +13,14 @@ import java.util.Optional;
 @Slf4j
 @Service
 @Primary
-@RequiredArgsConstructor
 public class UserServiceClientImpl implements UserServiceClient {
 
     private final RestClient userServiceClientInstance;
+
+    public UserServiceClientImpl(
+            @org.springframework.beans.factory.annotation.Qualifier("userServiceClientInstance") RestClient userServiceClientInstance) {
+        this.userServiceClientInstance = userServiceClientInstance;
+    }
 
     @Override
     public void registerOrUpdate(org.telegram.telegrambots.meta.api.objects.User from) {
