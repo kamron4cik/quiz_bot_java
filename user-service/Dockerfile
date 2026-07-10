@@ -1,8 +1,9 @@
 # user-service — Multi-stage build
-FROM eclipse-temurin:21-jdk-alpine AS builder
+FROM maven:3.9-eclipse-temurin-21-alpine AS builder
 WORKDIR /workspace
 COPY . .
-RUN apk add --no-cache maven &&     mvn -B package -pl user-service -am -DskipTests -q
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn -B package -pl user-service -am -DskipTests -q
     
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S quizplatform && adduser -S quizplatform -G quizplatform
