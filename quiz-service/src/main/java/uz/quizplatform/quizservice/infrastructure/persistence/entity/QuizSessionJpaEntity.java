@@ -63,7 +63,7 @@ public class QuizSessionJpaEntity {
     private String currentPollId;
 
     @Column(name = "current_correct_option_idx")
-    private Integer currentCorrectOptionIndex;
+    private Short currentCorrectOptionIndex;
 
     @Column(name = "current_question_sent_at")
     private Instant currentQuestionSentAt;
