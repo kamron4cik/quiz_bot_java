@@ -72,7 +72,7 @@ public class UserJpaEntity {
 
     @Column(name = "average_score")
     @Builder.Default
-    private double averageScore = 0.0;
+    private java.math.BigDecimal averageScore = java.math.BigDecimal.ZERO;
 
     @PrePersist
     protected void onCreate() {
