@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS import_jobs (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     admin_id        BIGINT      NOT NULL REFERENCES users(id),
     university_id   UUID        REFERENCES universities(id) ON DELETE SET NULL,
-    category_id     UUID        REFERENCES categories(id) ON DELETE SET NULL,
+    category_id     UUID,
 
     -- Source file info
     file_path       TEXT        NOT NULL,               -- MinIO path
