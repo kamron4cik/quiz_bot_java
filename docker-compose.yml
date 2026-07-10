@@ -131,12 +131,16 @@ services:
       - ADMIN_IDS=${ADMIN_IDS}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
     networks:
       - quizplatform-network
     depends_on:
       postgres:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      redis:
         condition: service_healthy
 
   quiz-service:
