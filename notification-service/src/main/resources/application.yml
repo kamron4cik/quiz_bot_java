@@ -25,6 +25,10 @@ telegram:
   bot:
     token: ${BOT_TOKEN}
 
+services:
+  quiz-service:
+    base-url: ${QUIZ_SERVICE_URL:http://localhost:8083}
+
 management:
   endpoints:
     web:

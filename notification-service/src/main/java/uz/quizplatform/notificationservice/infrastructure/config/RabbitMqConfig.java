@@ -38,6 +38,7 @@ public class RabbitMqConfig {
     public static final String PAYMENT_STATUS_KEY = "payment.status.changed";
     public static final String BROADCAST_KEY = "notification.broadcast";
     public static final String SINGLE_MSG_KEY = "notification.single";
+    public static final String SEND_QUESTION_KEY = "quiz.send.question";
 
     // ── Queue names ────────────────────────────────────────────────────────────
     public static final String SESSION_FINISHED_QUEUE = "quiz.session.finished.queue";
@@ -45,6 +46,7 @@ public class RabbitMqConfig {
     public static final String PAYMENT_STATUS_QUEUE = "payment.status.changed.queue";
     public static final String BROADCAST_QUEUE = "notification.broadcast.queue";
     public static final String SINGLE_MSG_QUEUE = "notification.single.queue";
+    public static final String SEND_QUESTION_QUEUE = "quiz.send.question.queue";
     public static final String DLQ = "notification.dlq";
 
     // ── Exchanges ──────────────────────────────────────────────────────────────
@@ -112,6 +114,14 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public Queue sendQuestionQueue() {
+        return QueueBuilder.durable(SEND_QUESTION_QUEUE)
+                .withArgument("x-dead-letter-exchange", DLX_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", DLQ)
+                .build();
+    }
+
+    @Bean
     public Queue deadLetterQueue() {
         return QueueBuilder.durable(DLQ).build();
     }
@@ -141,6 +151,11 @@ public class RabbitMqConfig {
     @Bean
     public Binding singleMessageBinding() {
         return BindingBuilder.bind(singleMessageQueue()).to(notificationExchange()).with(SINGLE_MSG_KEY);
+    }
+
+    @Bean
+    public Binding sendQuestionBinding() {
+        return BindingBuilder.bind(sendQuestionQueue()).to(quizEventsExchange()).with(SEND_QUESTION_KEY);
     }
 
     @Bean

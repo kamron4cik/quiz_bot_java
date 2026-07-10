@@ -37,6 +37,8 @@ public class QuizTimeoutScheduler {
     private final QuizSessionCache sessionCache;
     private final QuizEventPublisher eventPublisher;
     private final NotificationServiceClient notificationClient;
+    private final uz.quizplatform.quizservice.application.service.UserQuizStatsService statsService;
+    private final uz.quizplatform.quizservice.application.service.LeaderboardService leaderboardService;
 
     /**
      * Main background check — runs every 15 seconds.
@@ -83,6 +85,10 @@ public class QuizTimeoutScheduler {
             session.complete();
             sessionRepository.save(session);
             sessionCache.delete(session.getUserId());
+            
+            statsService.updateStats(session);
+            leaderboardService.updateLeaderboard(session);
+
             eventPublisher.publishSessionFinished(session);
             notificationClient.sendSessionResults(session);
             log.info("Session {} completed via question timeout", session.getId());
@@ -102,6 +108,10 @@ public class QuizTimeoutScheduler {
         session.timeout();
         sessionRepository.save(session);
         sessionCache.delete(session.getUserId());
+        
+        statsService.updateStats(session);
+        leaderboardService.updateLeaderboard(session);
+
         eventPublisher.publishSessionFinished(session);
         notificationClient.sendInactivityTimeoutNotification(session);
         log.info("Session {} closed due to inactivity (user {})", session.getId(), session.getUserId());

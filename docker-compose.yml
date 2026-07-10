@@ -1,6 +1,89 @@
 version: '3.9'
 
 services:
+
+  # ── Infrastructure ────────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: quizplatform-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: quizplatform
+      POSTGRES_USER: quizplatform
+      POSTGRES_PASSWORD: quizplatform
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - quizplatform-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizplatform -d quizplatform"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: quizplatform-redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - quizplatform-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: quizplatform-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - quizplatform-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: quizplatform-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-quizplatform}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-quizplatform123}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - quizplatform-network
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ── Application Services ──────────────────────────────────────────────────────
+
   gateway-service:
     build:
       context: .
@@ -11,15 +94,19 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - EUREKA_CLIENT_REGISTERWITHEUREKA=false
-      - EUREKA_CLIENT_FETCHREGISTRY=false
+      - USER_SERVICE_URL=http://user-service:8082
+      - QUIZ_SERVICE_URL=http://quiz-service:8083
+      - QUESTION_SERVICE_URL=http://question-service:8084
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8085
+      - ADMIN_SERVICE_URL=http://admin-service:8086
+      - IMPORT_SERVICE_URL=http://question-import-service:8087
     networks:
       - quizplatform-network
     depends_on:
-      - user-service
-      - quiz-service
-      - admin-service
-      - telegram-service
+      user-service:
+        condition: service_started
+      quiz-service:
+        condition: service_started
 
   user-service:
     build:
@@ -33,7 +120,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - PAYMENT_PRICE=${PAYMENT_PRICE}
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - PAYMENT_PRICE=${PAYMENT_PRICE:-15000}
       - PAYMENT_CARD=${PAYMENT_CARD}
       - PAYMENT_OWNER=${PAYMENT_OWNER}
       - ADMIN_GROUP_ID=${ADMIN_GROUP_ID}
@@ -41,6 +131,11 @@ services:
       - ADMIN_IDS=${ADMIN_IDS}
     networks:
       - quizplatform-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   quiz-service:
     build:
@@ -54,14 +149,25 @@ services:
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
       - SPRING_DATA_REDIS_HOST=redis
-      - NOTIFICATION_SERVICE_URL=http://notification-service:8080
-      - QUESTION_SERVICE_URL=http://question-service:8080
-      - USER_SERVICE_URL=http://user-service:8080
+      - SPRING_DATA_REDIS_PORT=6379
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8085
+      - QUESTION_SERVICE_URL=http://question-service:8084
+      - USER_SERVICE_URL=http://user-service:8082
     networks:
       - quizplatform-network
     depends_on:
-      - user-service
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
 
   question-service:
     build:
@@ -75,8 +181,16 @@ services:
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
     networks:
       - quizplatform-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   admin-service:
     build:
@@ -89,8 +203,21 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/quizplatform
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - USER_SERVICE_URL=http://user-service:8082
+      - QUIZ_SERVICE_URL=http://quiz-service:8083
+      - QUESTION_SERVICE_URL=http://question-service:8084
+      - NOTIFICATION_SERVICE_URL=http://notification-service:8085
     networks:
       - quizplatform-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   telegram-service:
     build:
@@ -102,13 +229,27 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - BOT_USERNAME=${TELEGRAM_BOT_USERNAME}
-      - USER_SERVICE_URL=http://user-service:8080
-      - QUIZ_SERVICE_URL=http://quiz-service:8080
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
+      - USER_SERVICE_URL=http://user-service:8082
+      - QUIZ_SERVICE_URL=http://quiz-service:8083
+      - QUESTION_SERVICE_URL=http://question-service:8084
+      - IMPORT_SERVICE_URL=http://question-import-service:8087
     networks:
       - quizplatform-network
     depends_on:
-      - user-service
-      - quiz-service
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      quiz-service:
+        condition: service_started
 
   notification-service:
     build:
@@ -120,8 +261,14 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
     networks:
       - quizplatform-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   question-import-service:
     build:
@@ -135,13 +282,30 @@ services:
       - SPRING_DATASOURCE_USERNAME=quizplatform
       - SPRING_DATASOURCE_PASSWORD=quizplatform
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_USERNAME:-guest}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-guest}
       - MINIO_URL=http://minio:9000
-      - MINIO_ACCESS_KEY=quizplatform
-      - MINIO_SECRET_KEY=quizplatform123
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-quizplatform}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-quizplatform123}
+      - QUESTION_SERVICE_URL=http://question-service:8084
     networks:
       - quizplatform-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
 
 networks:
   quizplatform-network:
     name: quizplatform-network
-    external: true
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:

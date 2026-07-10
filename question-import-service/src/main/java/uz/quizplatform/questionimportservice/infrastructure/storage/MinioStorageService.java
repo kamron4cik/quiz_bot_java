@@ -32,4 +32,21 @@ public class MinioStorageService {
             throw new RuntimeException("Storage error: " + e.getMessage(), e);
         }
     }
+
+    public void uploadFile(String objectName, InputStream inputStream, String contentType) {
+        try {
+            minioClient.putObject(
+                    io.minio.PutObjectArgs.builder()
+                            .bucket(bucketName)
+                            .object(objectName)
+                            .stream(inputStream, -1, 10485760) // 10MB chunk parts
+                            .contentType(contentType)
+                            .build()
+            );
+            log.info("File uploaded successfully to MinIO bucket={}: {}", bucketName, objectName);
+        } catch (Exception e) {
+            log.error("Failed to upload file to MinIO: {}", objectName, e);
+            throw new RuntimeException("Storage upload error: " + e.getMessage(), e);
+        }
+    }
 }

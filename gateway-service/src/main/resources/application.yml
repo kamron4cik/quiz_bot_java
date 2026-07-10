@@ -6,6 +6,12 @@ spring:
     name: gateway-service
   cloud:
     gateway:
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 15
+            redis-rate-limiter.burstCapacity: 30
+            key-resolver: "#{@userKeyResolver}"
       routes:
         - id: user-service
           uri: ${USER_SERVICE_URL:http://localhost:8082}

@@ -1,0 +1,31 @@
+{{- range $name, $svc := .Values.services }}
+{{- if or (eq $name "gateway") (eq $name "user") (eq $name "quiz") (eq $name "question") }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ $.Release.Name }}-{{ $name }}-hpa
+  labels:
+    app: {{ $name }}-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ $.Release.Name }}-{{ $name }}-service
+  minReplicas: {{ $svc.replicas }}
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 85
+{{- end }}
+{{- end }}

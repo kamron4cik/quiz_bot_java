@@ -23,6 +23,7 @@ public class ImportController {
     private final ImportJobRepository importJobRepository;
     private final ParsedQuestionRepository parsedQuestionRepository;
     private final ParseImportJobUseCase parseImportJobUseCase;
+    private final uz.quizplatform.questionimportservice.infrastructure.storage.MinioStorageService storageService;
 
     @PostMapping("/jobs")
     public ResponseEntity<ImportJob> createJob(@Valid @RequestBody CreateImportJobRequest request) {
@@ -56,4 +57,25 @@ public class ImportController {
     public ResponseEntity<List<ParsedQuestion>> getJobPreview(@PathVariable UUID jobId) {
         return ResponseEntity.ok(parsedQuestionRepository.findByJobId(jobId));
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<UploadResponse> upload(
+            @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        try {
+            String originalFilename = file.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String objectName = UUID.randomUUID().toString() + fileExtension;
+            
+            storageService.uploadFile(objectName, file.getInputStream(), file.getContentType());
+            
+            return ResponseEntity.ok(new UploadResponse(objectName, originalFilename));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    public record UploadResponse(String filePath, String originalFilename) {}
 }

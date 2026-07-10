@@ -36,4 +36,13 @@ public class TelegramMessageSenderImpl implements TelegramMessageSender {
             log.error("Failed to send message to chatId {}: {}", chatId, e.getMessage(), e);
         }
     }
+
+    @Override
+    public java.io.InputStream downloadFile(String fileId) throws Exception {
+        var getFile = org.telegram.telegrambots.meta.api.methods.GetFile.builder()
+                .fileId(fileId)
+                .build();
+        org.telegram.telegrambots.meta.api.objects.File file = telegramClient.execute(getFile);
+        return telegramClient.downloadFileAsStream(file);
+    }
 }
