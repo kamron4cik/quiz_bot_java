@@ -1,7 +1,7 @@
 package uz.quizplatform.quizservice.infrastructure.client;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -9,10 +9,13 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class UserServiceClientImpl implements UserServiceClient {
 
     private final RestClient userServiceClientInstance;
+
+    public UserServiceClientImpl(@Qualifier("userServiceClientInstance") RestClient userServiceClientInstance) {
+        this.userServiceClientInstance = userServiceClientInstance;
+    }
 
     @Override
     public Optional<User> getUser(Long userId) {

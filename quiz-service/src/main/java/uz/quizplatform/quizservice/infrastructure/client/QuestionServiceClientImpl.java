@@ -1,7 +1,7 @@
 package uz.quizplatform.quizservice.infrastructure.client;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -11,10 +11,13 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class QuestionServiceClientImpl implements QuestionServiceClient {
 
     private final RestClient questionServiceClientInstance;
+
+    public QuestionServiceClientImpl(@Qualifier("questionServiceClientInstance") RestClient questionServiceClientInstance) {
+        this.questionServiceClientInstance = questionServiceClientInstance;
+    }
 
     @Override
     public List<UUID> getQuestionIdsByCategory(UUID categoryId) {
