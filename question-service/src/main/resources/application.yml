@@ -28,6 +28,7 @@ spring:
 
   flyway:
     enabled: true
+    table: flyway_schema_history_question
     locations: classpath:db/migration
     baseline-on-migrate: true
 
